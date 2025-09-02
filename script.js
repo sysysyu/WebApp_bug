@@ -1025,28 +1025,27 @@ function addSubscriptionFormListeners() {
         if (additionalRouteCount >= 3) {
             addCandidateError.textContent = '候補経路は3つまでしか追加できません。';
             addCandidateError.classList.remove('hidden');
-            return;
+            // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
+            // returnを削除し、エラーメッセージ表示後も処理が続行するようにする
+            // return; 
+            // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
         }
 
         additionalRouteCount++;
+        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
+        // 経由駅3, 4を削除し、経由駅2までにする
         const newRouteHtml = `
             <div class="p-4 border border-dashed border-gray-300 rounded-lg space-y-4 additional-route">
                 <h3 class="text-lg font-semibold text-gray-600">候補経路 ${additionalRouteCount}</h3>
                 <div class="form-group">
                     <label for="additional_transit_station_1_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 1</label>
                     <input type="text" id="additional_transit_station_1_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 池袋" autocomplete="off">
+                    <p class="error-message hidden" id="additional_transit_station_1_${additionalRouteCount}Error"></p>
                 </div>
                 <div class="form-group hidden" id="additional_transit_station_2_wrapper_${additionalRouteCount}">
                     <label for="additional_transit_station_2_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 2</label>
                     <input type="text" id="additional_transit_station_2_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 大崎" autocomplete="off">
-                </div>
-                <div class="form-group hidden" id="additional_transit_station_3_wrapper_${additionalRouteCount}">
-                    <label for="additional_transit_station_3_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 3</label>
-                    <input type="text" id="additional_transit_station_3_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 横浜" autocomplete="off">
-                </div>
-                <div class="form-group hidden" id="additional_transit_station_4_wrapper_${additionalRouteCount}">
-                    <label for="additional_transit_station_4_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 4</label>
-                    <input type="text" id="additional_transit_station_4_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 川崎" autocomplete="off">
+                    <p class="error-message hidden" id="additional_transit_station_2_${additionalRouteCount}Error"></p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
@@ -1060,24 +1059,14 @@ function addSubscriptionFormListeners() {
                 </div>
             </div>
         `;
+        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
         additionalRoutesContainer.insertAdjacentHTML('beforeend', newRouteHtml);
         
         const newTransit1 = document.getElementById(`additional_transit_station_1_${additionalRouteCount}`);
         setupTransitStationLogic(newTransit1, `additional_transit_station_2_wrapper_${additionalRouteCount}`);
         
         // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-        // 経由駅3、4を順に表示するバグを仕込む
-        const newTransit2 = document.getElementById(`additional_transit_station_2_${additionalRouteCount}`);
-        const newTransit3Wrapper = document.getElementById(`additional_transit_station_3_wrapper_${additionalRouteCount}`);
-        newTransit2.addEventListener('blur', () => {
-            if (newTransit2.value.trim() !== '') newTransit3Wrapper.classList.remove('hidden');
-        });
-
-        const newTransit3 = document.getElementById(`additional_transit_station_3_${additionalRouteCount}`);
-        const newTransit4Wrapper = document.getElementById(`additional_transit_station_4_wrapper_${additionalRouteCount}`);
-        newTransit3.addEventListener('blur', () => {
-            if (newTransit3.value.trim() !== '') newTransit4Wrapper.classList.remove('hidden');
-        });
+        // 経由駅3, 4を表示するロジックを削除
         // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
 
         const newAmountInput = document.getElementById(`additional_amount_${additionalRouteCount}`);
@@ -1135,24 +1124,22 @@ function addSubscriptionFormListeners() {
         }
         
         // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-        // 追加した候補経路の経由駅が空欄の場合にエラーを出すバグ
-        let isAdditionalRouteValid = true;
+        // 追加した候補経路の経由駅が空欄の場合、入力欄直下にエラーを出す
         const additionalRoutesForValidation = additionalRoutesContainer.querySelectorAll('.additional-route');
         additionalRoutesForValidation.forEach(route => {
             const routeInputs = route.querySelectorAll('input[name^="additional_transit_stations"]');
             routeInputs.forEach(input => {
+                const errorElement = document.getElementById(input.id + 'Error');
                 // 表示されている入力欄が空の場合
                 if (!input.parentElement.classList.contains('hidden') && input.value.trim() === '') {
-                    isAdditionalRouteValid = false;
+                    if (errorElement) {
+                        errorElement.textContent = '経由駅を正しく入力してください。';
+                        errorElement.classList.remove('hidden');
+                    }
+                    isValid = false;
                 }
             });
         });
-
-        if (!isAdditionalRouteValid) {
-            addCandidateError.textContent = '経由駅を正しく入力してください。';
-            addCandidateError.classList.remove('hidden');
-            isValid = false;
-        }
         // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
 
 
