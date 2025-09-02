@@ -1,0 +1,191 @@
+/* Interフォントのインポート */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f3f4f6; /* ワークフロー画面の背景色 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 画面全体を占めるように設定 */
+    margin: 0;
+    padding: 20px; /* パディングを追加してモバイルでの見栄えを良くする */
+    box-sizing: border-box; /* パディングが幅に影響しないように */
+    color: #333; /* デフォルトの文字色 */
+}
+/* カスタムのメッセージボックススタイル */
+.message-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745; /* 成功メッセージの色 */
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    text-align: center;
+    font-weight: 500;
+}
+.message-box.show {
+    opacity: 1;
+    visibility: visible;
+}
+.message-box.error {
+    background-color: #dc3545; /* エラーメッセージの色 */
+}
+/* ログインフォームとワークフロー画面の共通コンテナスタイル */
+.app-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.8s ease-out;
+    max-width: 1200px; /* ワークフロー画面の最大幅をデフォルトとして設定 */
+    width: 100%; /* レスポンシブ対応 */
+    box-sizing: border-box;
+    /* ログイン画面のpaddingをデフォルトに、ワークフロー画面は内部で調整 */
+    padding: 40px; /* ログイン画面のデフォルトパディング */
+}
+/* ログイン画面の特定の幅を強制 */
+.login-content {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0; /* app-containerでpaddingを処理するため */
+}
+/* ワークフロー画面の個別スタイル */
+.workflow-content {
+    padding: 0; /* app-containerでパディングを処理するため */
+    text-align: left; /* ワークフロー画面のテキストを左寄せに */
+    margin: auto; /* 中央寄せ */
+    width: 100%;
+}
+.header-bg {
+    background-color: #ffffff; /* ヘッダーの背景色 */
+}
+.dynamic-area-bg {
+    background-color: #f7f7f7; /* 動的領域の背景色 */
+}
+.label {
+    min-height: 40px; /* ラベルの最小高さ */
+    display: flex;
+    align-items: center;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Common form group styling */
+.form-group label {
+    font-weight: 600;
+    color: #334155; /* Slate gray */
+    margin-bottom: 8px;
+    display: block;
+    text-align: left; /* Ensure labels are left-aligned */
+}
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group textarea,
+.form-group select,
+.form-group input[type="file"] { /* Added file input */
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cbd5e1; /* Light gray */
+    border-radius: 8px;
+    font-size: 16px;
+    color: #475569; /* Darker slate gray */
+    transition: border-color 0.2s;
+}
+.form-group input[type="text"]:focus,
+.form-group input[type="password"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="number"]:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+.form-group input[type="file"]:focus { /* Added file input */
+    outline: none;
+    border-color: #3b82f6; /* Blue */
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+.error-message {
+    color: #ef4444; /* Red */
+    font-size: 14px;
+    margin-top: 4px;
+    text-align: left; /* Ensure error messages are left-aligned */
+}
+/* Confirmation modal styles */
+.modal {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.modal-content {
+    background-color: white;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    text-align: left; /* Ensure content inside modal is left-aligned */
+}
+
+/* Additional styles from style.css, adapted for Tailwind where possible */
+.zip-code-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Adjust gap as needed */
+}
+
+.zip-code-group input {
+    flex-grow: 1;
+}
+
+.zip-code-group button {
+    flex-shrink: 0;
+    padding: 8px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.zip-code-group button:hover {
+    background-color: #0056b3;
+}
+
+
+/* 候補数追加で追加される項目用のスタイル */
+.route-option {
+    border: 1px dashed #ddd;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+/* 💡 変更点: ここから追加 */
+/* Chrome, Safari, Edge の場合に矢印を非表示 */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox の場合に矢印を非表示 */
+input[type=number] {
+  -moz-appearance: textfield;
+}
