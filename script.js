@@ -1040,6 +1040,14 @@ function addSubscriptionFormListeners() {
                     <label for="additional_transit_station_2_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 2</label>
                     <input type="text" id="additional_transit_station_2_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 大崎" autocomplete="off">
                 </div>
+                <div class="form-group hidden" id="additional_transit_station_3_wrapper_${additionalRouteCount}">
+                    <label for="additional_transit_station_3_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 3</label>
+                    <input type="text" id="additional_transit_station_3_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 横浜" autocomplete="off">
+                </div>
+                <div class="form-group hidden" id="additional_transit_station_4_wrapper_${additionalRouteCount}">
+                    <label for="additional_transit_station_4_${additionalRouteCount}" class="font-medium text-gray-700">経由駅 4</label>
+                    <input type="text" id="additional_transit_station_4_${additionalRouteCount}" name="additional_transit_stations_${additionalRouteCount}[]" class="w-full mt-1" placeholder="例: 川崎" autocomplete="off">
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-group">
                         <label class="font-medium text-gray-700">通勤時間</label>
@@ -1057,6 +1065,21 @@ function addSubscriptionFormListeners() {
         const newTransit1 = document.getElementById(`additional_transit_station_1_${additionalRouteCount}`);
         setupTransitStationLogic(newTransit1, `additional_transit_station_2_wrapper_${additionalRouteCount}`);
         
+        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
+        // 経由駅3、4を順に表示するバグを仕込む
+        const newTransit2 = document.getElementById(`additional_transit_station_2_${additionalRouteCount}`);
+        const newTransit3Wrapper = document.getElementById(`additional_transit_station_3_wrapper_${additionalRouteCount}`);
+        newTransit2.addEventListener('blur', () => {
+            if (newTransit2.value.trim() !== '') newTransit3Wrapper.classList.remove('hidden');
+        });
+
+        const newTransit3 = document.getElementById(`additional_transit_station_3_${additionalRouteCount}`);
+        const newTransit4Wrapper = document.getElementById(`additional_transit_station_4_wrapper_${additionalRouteCount}`);
+        newTransit3.addEventListener('blur', () => {
+            if (newTransit3.value.trim() !== '') newTransit4Wrapper.classList.remove('hidden');
+        });
+        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
+
         const newAmountInput = document.getElementById(`additional_amount_${additionalRouteCount}`);
         limitAmountInput(newAmountInput);
 
@@ -1110,6 +1133,28 @@ function addSubscriptionFormListeners() {
         } else if (primaryAmount.value.trim().length > 5) {
             showError('primaryAmount', '5桁以内で入力してください。');
         }
+        
+        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
+        // 追加した候補経路の経由駅が空欄の場合にエラーを出すバグ
+        let isAdditionalRouteValid = true;
+        const additionalRoutesForValidation = additionalRoutesContainer.querySelectorAll('.additional-route');
+        additionalRoutesForValidation.forEach(route => {
+            const routeInputs = route.querySelectorAll('input[name^="additional_transit_stations"]');
+            routeInputs.forEach(input => {
+                // 表示されている入力欄が空の場合
+                if (!input.parentElement.classList.contains('hidden') && input.value.trim() === '') {
+                    isAdditionalRouteValid = false;
+                }
+            });
+        });
+
+        if (!isAdditionalRouteValid) {
+            addCandidateError.textContent = '経由駅を正しく入力してください。';
+            addCandidateError.classList.remove('hidden');
+            isValid = false;
+        }
+        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
+
 
         if (!isValid) return;
 
@@ -1324,6 +1369,9 @@ function addMonthEndFormListeners() {
     const form = document.getElementById('monthEnd-form');
     
     const currentDate = new Date();
+    // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
+    const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
     const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0); // 月末日を取得
 
@@ -1335,7 +1383,9 @@ function addMonthEndFormListeners() {
                 altFormat: "Y年 F", 
             })
         ],
-        defaultDate: currentDate,
+        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
+        defaultDate: nextMonthDate,
+        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
         minDate: lastMonth,
         maxDate: nextMonth,
     });
