@@ -546,6 +546,11 @@ function loadWorkflowContent(workflowId) {
                             <div class="form-group hidden" id="transitStation2Wrapper">
                                 <label for="transitStation2" class="font-medium text-gray-700">経由駅 2</label>
                                 <input type="text" id="transitStation2" name="primary_transit_stations[]" class="w-full mt-1" placeholder="例: 品川" autocomplete="off">
+                                <p class="error-message hidden" id="transitStation2Error"></p>
+                            </div>
+                            <div class="form-group hidden" id="transitStation3Wrapper">
+                                <label for="transitStation3" class="font-medium text-gray-700">経由駅 3</label>
+                                <input type="text" id="transitStation3" name="primary_transit_stations[]" class="w-full mt-1" placeholder="例: 横浜" autocomplete="off">
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="form-group">
@@ -977,35 +982,33 @@ function addSubscriptionFormListeners() {
         time_24hr: true,
         allowInput: true,
     });
-
-    const setupTransitStationLogic = (transit1, transit2WrapperId) => {
-        const transit2Wrapper = document.getElementById(transit2WrapperId);
-        const transit2Input = transit2Wrapper.querySelector('input');
-
-        const showTransit2 = () => {
-            if (transit1.value.trim() !== '') {
-                setTimeout(() => {
-                    transit2Input.value = '';
-                }, 0);
-                transit2Wrapper.classList.remove('hidden');
-                transit1.removeEventListener('blur', showTransit2);
-                transit1.removeEventListener('keydown', handleEnterKey);
-            }
-        };
-
-        const handleEnterKey = (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                showTransit2();
-                transit2Input.focus();
-            }
-        };
-
-        transit1.addEventListener('blur', showTransit2);
-        transit1.addEventListener('keydown', handleEnterKey);
-    };
     
-    setupTransitStationLogic(document.getElementById('transitStation1'), 'transitStation2Wrapper');
+    // 主経路の経由駅表示ロジック
+    const transitStation1 = document.getElementById('transitStation1');
+    const transitStation2Wrapper = document.getElementById('transitStation2Wrapper');
+    const transitStation2 = document.getElementById('transitStation2');
+    const transitStation3Wrapper = document.getElementById('transitStation3Wrapper');
+
+    const showTransit2 = () => {
+        if (transitStation1.value.trim() !== '') {
+            transitStation2Wrapper.classList.remove('hidden');
+        } else {
+            transitStation2Wrapper.classList.add('hidden');
+        }
+    };
+    transitStation1.addEventListener('input', showTransit2);
+
+    // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
+    // 経由駅2に入力すると、仕様外の経由駅3が表示される
+    const showTransit3 = () => {
+        if (transitStation2.value.trim() !== '') {
+            transitStation3Wrapper.classList.remove('hidden');
+        } else {
+            transitStation3Wrapper.classList.add('hidden');
+        }
+    };
+    transitStation2.addEventListener('input', showTransit3);
+    // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
 
     const limitAmountInput = (inputElement) => {
         inputElement.addEventListener('input', () => {
@@ -1022,13 +1025,13 @@ function addSubscriptionFormListeners() {
 
     addCandidateBtn.addEventListener('click', () => {
         addCandidateError.classList.add('hidden');
-        // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
-        // 候補経路を3つ以上追加できないようにする制限を意図的に削除
-        // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
+        if (additionalRouteCount >= 3) {
+            addCandidateError.textContent = '候補経路は3つまでしか追加できません。';
+            addCandidateError.classList.remove('hidden');
+            return;
+        }
 
         additionalRouteCount++;
-        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-        // 経由駅3, 4を削除し、経由駅2までにする
         const newRouteHtml = `
             <div class="p-4 border border-dashed border-gray-300 rounded-lg space-y-4 additional-route">
                 <h3 class="text-lg font-semibold text-gray-600">候補経路 ${additionalRouteCount}</h3>
@@ -1054,15 +1057,18 @@ function addSubscriptionFormListeners() {
                 </div>
             </div>
         `;
-        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
         additionalRoutesContainer.insertAdjacentHTML('beforeend', newRouteHtml);
         
         const newTransit1 = document.getElementById(`additional_transit_station_1_${additionalRouteCount}`);
-        setupTransitStationLogic(newTransit1, `additional_transit_station_2_wrapper_${additionalRouteCount}`);
+        const newTransit2Wrapper = document.getElementById(`additional_transit_station_2_wrapper_${additionalRouteCount}`);
         
-        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-        // 経由駅3, 4を表示するロジックを削除
-        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
+        newTransit1.addEventListener('input', () => {
+            if (newTransit1.value.trim() !== '') {
+                newTransit2Wrapper.classList.remove('hidden');
+            } else {
+                newTransit2Wrapper.classList.add('hidden');
+            }
+        });
 
         const newAmountInput = document.getElementById(`additional_amount_${additionalRouteCount}`);
         limitAmountInput(newAmountInput);
@@ -1120,13 +1126,10 @@ function addSubscriptionFormListeners() {
         
         // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
         // 経由駅2が表示されているのに空の場合にエラーを表示する
-        const transitStation2Wrapper = document.getElementById('transitStation2Wrapper');
-        const transitStation2 = document.getElementById('transitStation2');
         if (!transitStation2Wrapper.classList.contains('hidden') && transitStation2.value.trim() === '') {
-            showError('destinationStation', '経由駅を正しく入力してください。');
+            showError('transitStation2', '経由駅を正しく入力してください。');
         }
         // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
-
 
         if (!isValid) return;
 
@@ -1185,15 +1188,11 @@ function addSubscriptionFormListeners() {
 
         openConfirmationModal('定期購入申請の確認', confirmHtml, () => {
             openMessageModal('送信成功', '定期購入申請が正常に送信されました！', () => {
-                const transit1 = document.getElementById('transitStation1');
-                const transit2Wrapper = document.getElementById('transitStation2Wrapper');
                 subscriptionForm.reset();
                 additionalRoutesContainer.innerHTML = '';
-                transit2Wrapper.classList.add('hidden');
+                transitStation2Wrapper.classList.add('hidden');
+                transitStation3Wrapper.classList.add('hidden');
                 addCandidateBtn.disabled = false;
-                
-                // イベントリスナーを再登録する必要があるため、ここで再度セットアップ
-                setupTransitStationLogic(transit1, 'transitStation2Wrapper');
             });
         });
     });
