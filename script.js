@@ -548,10 +548,6 @@ function loadWorkflowContent(workflowId) {
                                 <input type="text" id="transitStation2" name="primary_transit_stations[]" class="w-full mt-1" placeholder="例: 品川" autocomplete="off">
                                 <p class="error-message hidden" id="transitStation2Error"></p>
                             </div>
-                            <div class="form-group hidden" id="transitStation3Wrapper">
-                                <label for="transitStation3" class="font-medium text-gray-700">経由駅 3</label>
-                                <input type="text" id="transitStation3" name="primary_transit_stations[]" class="w-full mt-1" placeholder="例: 横浜" autocomplete="off">
-                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="form-group">
                                     <label for="primaryCommuteTime" class="font-medium text-gray-700">通勤時間 <span class="text-red-500">*</span></label>
@@ -980,8 +976,6 @@ function addSubscriptionFormListeners() {
     // 主経路の経由駅表示ロジック
     const transitStation1 = document.getElementById('transitStation1');
     const transitStation2Wrapper = document.getElementById('transitStation2Wrapper');
-    const transitStation2 = document.getElementById('transitStation2');
-    const transitStation3Wrapper = document.getElementById('transitStation3Wrapper');
 
     const showTransit2 = () => {
         if (transitStation1.value.trim() !== '') {
@@ -991,18 +985,6 @@ function addSubscriptionFormListeners() {
         }
     };
     transitStation1.addEventListener('input', showTransit2);
-
-    // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
-    // 経由駅2に入力すると、仕様外の経由駅3が表示される
-    const showTransit3 = () => {
-        if (transitStation2.value.trim() !== '') {
-            transitStation3Wrapper.classList.remove('hidden');
-        } else {
-            transitStation3Wrapper.classList.add('hidden');
-        }
-    };
-    transitStation2.addEventListener('input', showTransit3);
-    // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
 
     const limitAmountInput = (inputElement) => {
         inputElement.addEventListener('input', () => {
@@ -1118,13 +1100,6 @@ function addSubscriptionFormListeners() {
             showError('primaryAmount', '5桁以内で入力してください。');
         }
         
-        // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
-        // 経由駅2が表示されているのに空の場合にエラーを表示する
-        if (!transitStation2Wrapper.classList.contains('hidden') && transitStation2.value.trim() === '') {
-            showError('transitStation2', '経由駅を正しく入力してください。');
-        }
-        // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
-
         if (!isValid) return;
 
         const formData = new FormData(subscriptionForm);
@@ -1185,7 +1160,6 @@ function addSubscriptionFormListeners() {
                 subscriptionForm.reset();
                 additionalRoutesContainer.innerHTML = '';
                 transitStation2Wrapper.classList.add('hidden');
-                transitStation3Wrapper.classList.add('hidden');
                 addCandidateBtn.disabled = false;
             });
         });
