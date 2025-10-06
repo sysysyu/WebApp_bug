@@ -1022,14 +1022,9 @@ function addSubscriptionFormListeners() {
 
     addCandidateBtn.addEventListener('click', () => {
         addCandidateError.classList.add('hidden');
-        if (additionalRouteCount >= 3) {
-            addCandidateError.textContent = '候補経路は3つまでしか追加できません。';
-            addCandidateError.classList.remove('hidden');
-            // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-            // returnを削除し、エラーメッセージ表示後も処理が続行するようにする
-            // return; 
-            // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
-        }
+        // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
+        // 候補経路を3つ以上追加できないようにする制限を意図的に削除
+        // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
 
         additionalRouteCount++;
         // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
@@ -1123,24 +1118,14 @@ function addSubscriptionFormListeners() {
             showError('primaryAmount', '5桁以内で入力してください。');
         }
         
-        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-        // 追加した候補経路の経由駅が空欄の場合、入力欄直下にエラーを出す
-        const additionalRoutesForValidation = additionalRoutesContainer.querySelectorAll('.additional-route');
-        additionalRoutesForValidation.forEach(route => {
-            const routeInputs = route.querySelectorAll('input[name^="additional_transit_stations"]');
-            routeInputs.forEach(input => {
-                const errorElement = document.getElementById(input.id + 'Error');
-                // 表示されている入力欄が空の場合
-                if (!input.parentElement.classList.contains('hidden') && input.value.trim() === '') {
-                    if (errorElement) {
-                        errorElement.textContent = '経由駅を正しく入力してください。';
-                        errorElement.classList.remove('hidden');
-                    }
-                    isValid = false;
-                }
-            });
-        });
-        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
+        // ▼▼▼▼▼ バグ潜伏箇所 ▼▼▼▼▼
+        // 経由駅2が表示されているのに空の場合にエラーを表示する
+        const transitStation2Wrapper = document.getElementById('transitStation2Wrapper');
+        const transitStation2 = document.getElementById('transitStation2');
+        if (!transitStation2Wrapper.classList.contains('hidden') && transitStation2.value.trim() === '') {
+            showError('destinationStation', '経由駅を正しく入力してください。');
+        }
+        // ▲▲▲▲▲ バグ潜伏箇所 ▲▲▲▲▲
 
 
         if (!isValid) return;
@@ -1536,3 +1521,4 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLoginScreen();
     }
 });
+
