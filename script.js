@@ -499,7 +499,7 @@ function loadWorkflowContent(workflowId) {
 
                         <div class="form-group">
                             <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">
-                                理由
+                                理由 <span class="text-red-500">*</span>
                             </label>
                             <textarea id="reason" name="reason" rows="4" maxlength="256"
                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -823,20 +823,14 @@ function addAttendanceFormListeners() {
     updateAttendanceFormSections();
     
     // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-    // 遅刻時間のプルダウンにバグを仕込む
+    // 遅刻時間のプルダウンを5分刻みで60分まで生成するように修正
     lateTimeSelect.innerHTML = '<option value="">選択してください</option>';
-    // 5分単位で30分まで追加
-    for (let i = 5; i <= 30; i += 5) {
+    for (let i = 5; i <= 60; i += 5) {
         const option = document.createElement('option');
         option.value = i;
         option.textContent = `${i}分`;
         lateTimeSelect.appendChild(option);
     }
-    // 30分以降は30分単位 (次は60分)
-    const option60 = document.createElement('option');
-    option60.value = 60;
-    option60.textContent = '60分';
-    lateTimeSelect.appendChild(option60);
     // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
 
     generateTimeOptions(middleLeaveTimeSelect); // 中抜け時間は元のまま
