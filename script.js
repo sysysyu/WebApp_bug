@@ -1308,9 +1308,6 @@ function addMonthEndFormListeners() {
     const form = document.getElementById('monthEnd-form');
     
     const currentDate = new Date();
-    // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-    const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
-    // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
     const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     const nextMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0); // 月末日を取得
 
@@ -1322,9 +1319,7 @@ function addMonthEndFormListeners() {
                 altFormat: "Y年 F", 
             })
         ],
-        // ▼▼▼▼▼ バグ修正箇所 ▼▼▼▼▼
-        defaultDate: nextMonthDate,
-        // ▲▲▲▲▲ バグ修正箇所 ▲▲▲▲▲
+        defaultDate: currentDate,
         minDate: lastMonth,
         maxDate: nextMonth,
     });
